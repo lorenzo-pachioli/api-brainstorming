@@ -38,3 +38,11 @@ exports.returnError = (err, req, res, next) => {
     data: []
   });
 }
+
+exports.serviceReturn = (msg, content, status) => {
+  return {
+    msg,
+    content,
+    status
+  }
+}

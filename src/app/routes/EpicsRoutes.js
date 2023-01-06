@@ -8,25 +8,14 @@ const {
 } = require('../controllers/EpicsController');
 const router = express.Router();
 const { setNext } = require('../../utils/response');
+const { isIdAndTokenValid, isTokenValid } = require('../../utils/isIdAndTokenValid');
+const { isNewEpicValid } = require("../helpers/newItemsValidator");
 
-router.get("", (req, res, next) => {
+router.get("", isTokenValid, AllEpicsController);
 
-    const token = req.header('token');
-    setNext(next);
+router.post("", isTokenValid, isNewEpicValid, NewEpicsController);
 
-    AllEpicsController(token, res);
-});
-
-router.post("", (req, res, next) => {
-
-    const newEpic = req.body;
-    const token = req.header('token');
-    setNext(next);
-
-    NewEpicsController(token, newEpic, res);
-});
-
-router.get("/:id", (req, res, next) => {
+router.get("/:id", isIdAndTokenValid, EpicsControllerById, (req, res, next) => {
 
     const id = req.params.id;
     const token = req.header('token');
@@ -35,7 +24,7 @@ router.get("/:id", (req, res, next) => {
     EpicsControllerById(token, id, res);
 });
 
-router.get("/:id/stories", (req, res, next) => {
+router.get("/:id/stories", isIdAndTokenValid, EpicsControllerByIdAllStories, (req, res, next) => {
 
     const id = req.params.id;
     const token = req.header('token');
@@ -44,7 +33,7 @@ router.get("/:id/stories", (req, res, next) => {
     EpicsControllerByIdAllStories(token, id, res);
 });
 
-router.delete("/:id", (req, res, next) => {
+router.delete("/:id", isIdAndTokenValid, EpicDeleteByIdController, (req, res, next) => {
 
     const id = req.params.id;
     const token = req.header('token');

@@ -7,33 +7,61 @@ const {
   EpicDeleteByIdService
 } = require('../services/EpicsService');
 const { isNewEpicValid } = require('../helpers/newItemsValidator');
-const { next } = require('../../utils/response');
 const { newError } = require('../../utils/errorModeling');
+const { ProjectServiceById } = require('../services/ProjectsService');
 
-exports.NewEpicsController = (token, newEpic, res) => {
-
-  if (isTokenValid(token, res) && isNewEpicValid(newEpic, res)) {
-    NewEpicsService(newEpic, res).catch(() => next(newError(`Couldn't save epic`, 500)));
+exports.AllEpicsController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const epicList = await AllEpicsService(id);
+    return response(epicList.msg, res, 200, epicList.content);
+  } catch (err) {
+    next(newError(`Couldn't get epic list`, 500));
   }
 }
 
-exports.AllEpicsController = (token, res) => {
+exports.NewEpicsController = async (req, res, next) => {
+  try {
+    const newEpic = req.body;
+    const projectExist = await ProjectServiceById(newEpic.project);
+    if (!projectExist.status) return response(projectExist.msg, res, 200, {});
 
-  const userId = isTokenValid(token, res);
-  userId && AllEpicsService(userId, res).catch(() => next(newError(`Couldn't get epic list`, 500)));
+    const epicSaved = await NewEpicsService(newEpic);
+    return response(epicSaved.msg, res, 200, epicSaved.content);
+  } catch (err) {
+    next(newError(`Couldn't create epic`, 500))
+  }
 }
 
-exports.EpicsControllerById = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && EpicsServiceById(id, res).catch(() => next(newError(`Couldn't get epic`, 500)));
+exports.EpicsControllerById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const epic = await EpicsServiceById(id);
+    return response(epic.msg, res, 200, epic.content);
+  } catch (err) {
+    next(newError(`Couldn't get epic`, 500))
+  }
 }
 
-exports.EpicsControllerByIdAllStories = (token, id, res) => {
+exports.EpicsControllerByIdAllStories = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const epicExist = await EpicsServiceById(id);
+    if (!epicExist.status) return response(epicExist.msg, res, 200, {});
 
-  isIdAndTokenValid(id, token, res) && EpicsServiceByIdAllStories(id, res).catch(() => next(newError(`Couldn't get story list for epic ${id}`, 500)));
+    const storiesList = await EpicsServiceByIdAllStories(id);
+    return response(storiesList.msg, res, 200, storiesList.content);
+  } catch (err) {
+    next(newError(`Couldn't get story list for epic ${id}`, 500))
+  }
 }
 
-exports.EpicDeleteByIdController = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && EpicDeleteByIdService(id, res).catch(() => next(newError(`Couldn't get task`, 500)));
+exports.EpicDeleteByIdController = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const epicDelete = await EpicDeleteByIdService(id);
+    return response(epicDelete.msg, res, 200, epicDelete.content);
+  } catch (err) {
+    next(newError(`Couldn't get task`, 500))
+  }
 }

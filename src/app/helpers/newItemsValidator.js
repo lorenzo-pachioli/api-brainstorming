@@ -52,8 +52,8 @@ exports.isNewProjectValid = (newProject, res) => {
   return true;
 }
 
-exports.isNewEpicValid = (newEpic, res) => {
-  const { project, name, description } = newEpic;
+exports.isNewEpicValid = (req, res, next) => {
+  const { project, name, description } = req.body;
 
   //Validate required info
   if (!name || !project) return response('Incorrect new project', res, 400);
@@ -67,7 +67,7 @@ exports.isNewEpicValid = (newEpic, res) => {
   //Validate project id
   if (!isObjectIdValid(project)) return response('Project id invalid', res, 400);
 
-  return true;
+  next();
 }
 
 exports.isNewStoryValid = (newStory, res) => {
