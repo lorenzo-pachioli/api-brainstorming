@@ -1,5 +1,5 @@
 const { LoginService } = require('../services/LoginService');
-const { response } = require('../../utils/response');
+const { response, logInResponse } = require('../../utils/response');
 const { newError } = require('../../utils/errorModeling');
 
 exports.LoginController = async (req, res, next) => {
@@ -14,9 +14,7 @@ exports.LoginController = async (req, res, next) => {
     }
 
     const logedIn = await LoginService(user);
-    if (logedIn) return response(`Correct login user ${user.username}`, res, 200, logedIn);
-
-    return response(`User ${user.username} doesn't exist`, res, 200, {});
+    return logInResponse(logedIn.msg, res, 200, logedIn.content.token, logedIn.content.user);
   } catch (err) {
     return next(newError(`Couldn't login${err}`, 500));
   }
