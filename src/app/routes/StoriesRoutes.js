@@ -7,50 +7,17 @@ const {
     StoryDeleteByIdController
 } = require('../controllers/StoriesController');
 const router = express.Router();
-const { setNext } = require('../../utils/response');
+const { isNewStoryValid } = require("../helpers/newItemsValidator");
+const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
 
-router.get("", (req, res, next) => {
+router.get("", isTokenValid, AllStoriesController);
 
-    const token = req.header('token');
-    setNext(next);
+router.post("", isTokenValid, isNewStoryValid, NewStoriesController);
 
-    AllStoriesController(token, res);
-});
+router.get("/:id", isIdAndTokenValid, StoriesControllerById);
 
-router.post("", (req, res, next) => {
+router.get("/:id/tasks", isIdAndTokenValid, StoriesControllerByIdAllTasks);
 
-    const newStory = req.body;
-    const token = req.header('token');
-    setNext(next);
-
-    NewStoriesController(token, newStory, res);
-});
-
-router.get("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    StoriesControllerById(token, id, res);
-});
-
-router.get("/:id/tasks", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    StoriesControllerByIdAllTasks(token, id, res);
-});
-
-router.delete("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    StoryDeleteByIdController(token, id, res);
-});
+router.delete("/:id", isIdAndTokenValid, StoryDeleteByIdController);
 
 module.exports = router;

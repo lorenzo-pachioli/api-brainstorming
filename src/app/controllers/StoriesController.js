@@ -1,4 +1,3 @@
-const { isIdAndTokenValid, isTokenValid } = require('../../utils/isIdAndTokenValid');
 const {
   AllStoriesService,
   NewStoriesService,
@@ -6,34 +5,59 @@ const {
   StoriesServiceByIdAllTasks,
   StoryDeleteByIdService
 } = require('../services/StoriesService');
-const { isNewStoryValid } = require('../helpers/newItemsValidator');
-const { next } = require('../../utils/response');
 const { newError } = require('../../utils/errorModeling');
 
-exports.NewStoriesController = (token, newStory, res) => {
-
-  if (isTokenValid(token, res) && isNewStoryValid(newStory, res)) {
-    NewStoriesService(newStory, res).catch(() => next(newError(`Couldn't save story`, 500)));
+exports.NewStoriesController = async (req, res, next) => {
+  try {
+    const newStory = req.body;
+    const storySaved = await NewStoriesService(newStory);
+    return response(storySaved.msg, res, 200, storySaved.content);
+  } catch (err) {
+    return next(newError(`Couldn't save story`, 500));
   }
 }
 
-exports.AllStoriesController = (token, res) => {
-
-  const userId = isTokenValid(token, res);
-  userId && AllStoriesService(userId, res).catch(() => next(newError(`Couldn't get stories list`, 500)));
+exports.AllStoriesController = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const storiesList = await AllStoriesService(userId);
+    return response(storiesList.msg, res, 200, storiesList.content);
+  } catch (err) {
+    return next(newError(`Couldn't get stories list`, 500));
+  }
 }
 
-exports.StoriesControllerById = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && StoriesServiceById(id, res).catch(() => next(newError(`Couldn't get story`, 500)));
+exports.StoriesControllerById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const storyById = await StoriesServiceById(userId);
+    return response(storyById.msg, res, 200, storyById.content);
+  } catch (err) {
+    return next(newError(`Couldn't get story`, 500));
+  }
 }
 
-exports.StoriesControllerByIdAllTasks = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && StoriesServiceByIdAllTasks(id, res).catch(() => next(newError(`Couldn't get tasks list for story ${id}`, 500)));
+exports.StoriesControllerByIdAllTasks = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const storyExist = await StoriesServiceById(userId);
+    if (!storyExist.status) return response(storyExist.msg, res, 200, {});
+    const taskList = await StoriesServiceByIdAllTasks(userId);
+    return response(taskList.msg, res, 200, taskList.content);
+  } catch (err) {
+    return next(newError(`Couldn't get tasks list for story ${id}`, 500));
+  }
 }
 
-exports.StoryDeleteByIdController = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && StoryDeleteByIdService(id, res).catch(() => next(newError(`Couldn't get task`, 500)));
+exports.StoryDeleteByIdController = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const storyExist = await StoriesServiceById(userId);
+    if (!storyExist.status) return response(storyExist.msg, res, 200, {});
+    const storyDelted = await StoryDeleteByIdService(userId);
+    if (!storyDelted.status) return response(storyDelted.msg, res, 200, {});
+    return response(storyDelted.msg, res, 200, storyExist.content);
+  } catch (err) {
+    return next(newError(`Couldn't get task`, 500));
+  }
 }

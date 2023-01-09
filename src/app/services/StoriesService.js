@@ -1,54 +1,46 @@
 const Stories = require('../models/StoriesModel');
 const Tasks = require('../models/TasksModel');
 const { createStories } = require('../helpers/modelCreators');
-const { response } = require('../../utils/response');
-const Epics = require('../models/EpicsModel');
-const Projects = require('../models/ProjectsModel');
+const { AllEpicsService } = require('./EpicsService');
+const { serviceReturn } = require('../../utils/response');
 
-exports.NewStoriesService = async (newStory, res) => {
+exports.NewStoriesService = async (newStory) => {
 
   const lastStory = await Stories.findOne().sort({ _id: -1 }).limit(1);
   const newMaxId = lastStory ? lastStory.id + 1 : 1;
   const story = createStories(newMaxId, newStory);
-  story.save();
-
-  return response(`Story created succesfully`, res, 200, story);
+  const saved = await story.save();
+  if (saved) return serviceReturn(`Story created succesfully`, saved, true);
+  return serviceReturn(`The Story ${newStory.id} failed to save`, {}, false);
 }
 
-exports.AllStoriesService = async (userId, res) => {
+exports.AllStoriesService = async (userId) => {
 
-  const projects = await Projects.find({ members: { $in: [userId] } });
-  const ids = projects.map(p => `${p._id}`);
-  const epicList = await Epics.find({ project: { $in: ids } });
-  const epicsIds = epicList.map(e => `${e._id}`);
+  const epicList = await AllEpicsService(userId);
+  if (!epicList.status) return epicList;
+  const epicsIds = epicList.content.map(e => `${e._id}`);
   const storiesList = await Stories.find({ epic: { $in: epicsIds } });
-  return response(`Stories list`, res, 200, storiesList);
+  return serviceReturn(`Stories list`, storiesList, true);
 }
 
-exports.StoriesServiceById = async (id, res) => {
+exports.StoriesServiceById = async (id) => {
 
   const storyById = await Stories.findOne({ id: id });
-  if (storyById) return response(`Story ${id}`, res, 200, storyById);
-
-  return response(`Story ${id} doesn't exist`, res, 200, {});
+  if (storyById) return serviceReturn(`Story ${id}`, storyById, true);
+  return serviceReturn(`Story ${id} doesn't exist`, {}, false);
 }
 
-exports.StoriesServiceByIdAllTasks = async (id, res) => {
+exports.StoriesServiceByIdAllTasks = async (id) => {
 
-  const storyById = await Stories.findOne({ id: id });
-  if (!storyById) return response(`Story ${id} doesn't exist`, res, 200);
-
-  const taskList = await Tasks.find({ story: storyById._id });
-  if (taskList.length > 0) return response(`There're no tasks for story ${id}`, res, 200, taskList);
-
-  return response(`Tasks for story ${id}`, res, 200);
+  const taskList = await Tasks.find({ story: id });
+  if (taskList.length > 0) return serviceReturn(`Tasks for story ${id}`, taskList, true);
+  return serviceReturn(`There're no tasks for story ${id}`, [], false);
 }
 
-exports.StoryDeleteByIdService = async (id, res) => {
-  const story = await Stories.findOne({ id: id });
-  const task = await Tasks.deleteMany({ story: `${story._id}` });
+exports.StoryDeleteByIdService = async (id) => {
+
+  await Tasks.deleteMany({ story: `${id}` });
   const storyById = await Stories.deleteOne({ id: id });
-  if (storyById.deletedCount > 0) return response(`Story ${id}`, res, 200, story);
-
-  return response(`Story ${id} doesn't exist`, res, 200, {});
+  if (storyById.deletedCount > 0) return serviceReturn(`Story ${id} deleted`, {}, true);
+  return serviceReturn(`Story ${id} doesn't exist`, {}, false);
 }
