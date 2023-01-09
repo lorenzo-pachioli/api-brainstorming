@@ -7,9 +7,9 @@ const {
 } = require('../../utils/inputsValidator');
 const { response } = require('../../utils/response');
 
-exports.isNewUserValid = (newUser, res) => {
+exports.isNewUserValid = (req, res, next) => {
 
-  const { email, password, username, name } = newUser;
+  const { email, password, username, name } = req.body;
   const regExEmail = /^[-\w.%+]{1,30}@(?:[A-Z0-9-]{4,30}\.)[A-Z]{2,20}$/i;
   const onlyNumbers = /^(.*\d){6,15}$/;
 
@@ -31,11 +31,11 @@ exports.isNewUserValid = (newUser, res) => {
   //Validate name.last
   if (name.last.length < 4) return response('Incorrect name last', res, 400);
 
-  return true;
+  next();
 }
 
-exports.isNewProjectValid = (newProject, res) => {
-  const { name, members, description } = newProject;
+exports.isNewProjectValid = (req, res, next) => {
+  const { name, members, description } = req.body;
 
   //Validate required info
   if (!name || !members) return response('Incorrect new project', res, 400);
@@ -49,7 +49,7 @@ exports.isNewProjectValid = (newProject, res) => {
   //Validate project members id
   if (!isArrayOfObjIdValid(members)) return response('Project members id invalid', res, 400);
 
-  return true;
+  next();
 }
 
 exports.isNewEpicValid = (req, res, next) => {
@@ -70,7 +70,7 @@ exports.isNewEpicValid = (req, res, next) => {
   next();
 }
 
-exports.isNewStoryValid = (newStory, res) => {
+exports.isNewStoryValid = (req, res, next) => {
   const {
     name,
     epic,
@@ -83,7 +83,7 @@ exports.isNewStoryValid = (newStory, res) => {
     started,
     finished,
     status
-  } = newStory;
+  } = req.body;
 
   //Validate required info
   if (!name || !epic) return response('Incorrect new story', res, 400);
@@ -121,10 +121,10 @@ exports.isNewStoryValid = (newStory, res) => {
   //Validate finished
   if (finished && !isDateValid(finished)) return response('Story finished date is invalid', res, 400);
 
-  return true;
+  next();
 }
 
-exports.isNewTaskValid = (newTask, res) => {
+exports.isNewTaskValid = (req, res, next) => {
   const {
     name,
     description,
@@ -132,7 +132,7 @@ exports.isNewTaskValid = (newTask, res) => {
     created,
     dueDate,
     done
-  } = newTask;
+  } = req.body;
 
   //Validate required info
   if (!name || !story) return response('Incorrect new task', res, 400);
@@ -155,5 +155,5 @@ exports.isNewTaskValid = (newTask, res) => {
   //Validate done
   if (done && done !== true && done !== false) return response('Task done is invalid', res, 400);
 
-  return true;
+  next();
 }

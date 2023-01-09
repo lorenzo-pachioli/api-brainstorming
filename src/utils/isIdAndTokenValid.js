@@ -15,6 +15,6 @@ exports.isTokenValid = (req, res, next) => {
   const token = req.header('token');
   const userId = tokenValidator(token);
   if (!userId) return response('Unauthorized', res, 401);
-  req.params.id = userId;
+  req.params.userId = userId;
   return next();
 }

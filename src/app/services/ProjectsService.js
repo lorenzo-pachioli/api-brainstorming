@@ -1,49 +1,42 @@
 const Projects = require('../models/ProjectsModel');
 const Epics = require('../models/EpicsModel');
 const { createProjects } = require('../helpers/modelCreators');
-const { response } = require('../../utils/response');
+const { serviceReturn } = require('../../utils/serviceReturn');
 
-exports.NewProjectService = async (newProject, res) => {
+exports.NewProjectService = async (newProject) => {
 
   const projectsList = await Projects.findOne().sort({ _id: -1 }).limit(1);
   const newMaxId = projectsList ? projectsList.id + 1 : 1;
   const project = createProjects(newMaxId, newProject);
-  project.save();
-
-  return response(`Project created succesfully`, res, 200, project);
+  const saved = await project.save();
+  if (saved) return serviceReturn(`Project created succesfully`, saved, true);
+  return serviceReturn(`The project ${newProject.id} failed to save`, {}, false);
 }
 
-exports.AllProjectService = async (userId, res) => {
+exports.AllProjectService = async (userId) => {
 
   const projectsList = await Projects.find({ members: { $in: [userId] } });
-
-  return response(`Project list`, res, 200, projectsList);
+  return serviceReturn(`Project list`, projectsList, true);
 }
 
-exports.ProjectServiceById = async (id, res) => {
+exports.ProjectServiceById = async (id) => {
 
   const projectById = await Projects.findOne({ id: id });
-  if (projectById) return response(`Project ${id} doesn't exist`, res, 200, projectById);
-
-  return response(`Project list`, res, 200, {});
+  if (projectById) return serviceReturn(`Project list`, projectById, true);
+  return serviceReturn(`Project ${id} doesn't exist`, {}, false);
 }
 
-exports.ProjectServiceByIdAllEpics = async (id, res) => {
+exports.ProjectServiceByIdAllEpics = async (id) => {
 
-  const projectById = await Projects.findOne({ id: id });
-  if (!projectById) return response(`Project ${id} doesn't exist`, res, 200);
-
-  const epicsList = await Epics.find({ project: projectById._id });
-  if (epicsList.length > 0) return response(`Epics for project ${id}`, res, 200, epicsList);
-
-  return response(`There're no epics for project ${id}`, res, 200);
+  const epicsList = await Epics.find({ project: id });
+  if (epicsList.length > 0) return serviceReturn(`Epics for project ${id}`, epicsList, true);
+  return serviceReturn(`There're no epics for project ${id}`, [], false);
 }
 
-exports.ProjectDeleteByIdService = async (id, res) => {
+exports.ProjectDeleteByIdService = async (id) => {
 
-  const project = await Projects.findOne({ id: id });
   const projectById = await Projects.deleteOne({ id: id });
-  if (projectById.deletedCount > 0) return response(`Project ${id}`, res, 200, project);
+  if (projectById.deletedCount > 0) return serviceReturn(`Project ${id} deleted`, {}, true);
 
-  return response(`Project ${id} doesn't exist`, res, 200, {});
+  return serviceReturn(`Project ${id} doesn't exist`, {}, false);
 }

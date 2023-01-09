@@ -1,5 +1,3 @@
-const { isIdAndTokenValid, isTokenValid } = require('../../utils/isIdAndTokenValid');
-const { isNewProjectValid } = require('../helpers/newItemsValidator');
 const {
   AllProjectService,
   NewProjectService,
@@ -7,33 +5,60 @@ const {
   ProjectServiceByIdAllEpics,
   ProjectDeleteByIdService
 } = require('../services/ProjectsService');
-const { next } = require('../../utils/response');
 const { newError } = require('../../utils/errorModeling');
+const { response } = require('../../utils/response');
 
-exports.NewProjectController = (token, newProject, res) => {
-
-  if (isTokenValid(token, res) && isNewProjectValid(newProject, res)) {
-    NewProjectService(newProject, res).catch(() => next(newError(`Couldn't save project`, 500)));
+exports.NewProjectController = async (req, res, next) => {
+  try {
+    const newProject = req.body;
+    const projectSaved = await NewProjectService(newProject);
+    return response(projectSaved.msg, res, 200, projectSaved.content);
+  } catch (err) {
+    return next(newError(`Couldn't save project`, 500));
   }
 }
 
-exports.AllProjectController = (token, res) => {
-
-  const userId = isTokenValid(token, res);
-  userId && AllProjectService(userId, res).catch(() => next(newError(`Couldn't get project list`, 500)));
+exports.AllProjectController = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const projectList = await AllProjectService(userId, res);
+    return response(projectList.msg, res, 200, projectList.content);
+  } catch (err) {
+    return next(newError(`Couldn't get project list`, 500));
+  }
 }
 
-exports.ProjectControllerById = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && ProjectServiceById(id, res).catch(() => next(newError(`Couldn't get project list`, 500)));
+exports.ProjectControllerById = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const projectById = await ProjectServiceById(id);
+    return response(projectById.msg, res, 200, projectById.content);
+  } catch (err) {
+    return next(newError(`Couldn't get project list`, 500));
+  }
 }
 
-exports.ProjectControllerByIdAllEpics = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && ProjectServiceByIdAllEpics(id, res).catch(() => next(newError(`Couldn't get epic list for project ${id}`, 500)));
+exports.ProjectControllerByIdAllEpics = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const projectExist = await ProjectServiceById(id);
+    if (!projectExist.status) return response(projectExist.msg, res, 200, {});
+    const epicList = await ProjectServiceByIdAllEpics(id);
+    return response(epicList.msg, res, 200, epicList.content);
+  } catch (err) {
+    return next(newError(`Couldn't get epic list for project ${id}`, 500));
+  }
 }
 
-exports.ProjectDeleteByIdController = (token, id, res) => {
-
-  isIdAndTokenValid(id, token, res) && ProjectDeleteByIdService(id, res).catch(() => next(newError(`Couldn't delete project`, 500)));
+exports.ProjectDeleteByIdController = async (req, res, next) => {
+  try {
+    const id = req.params.id;
+    const projectExist = await ProjectServiceById(id);
+    if (!projectExist.status) return response(projectExist.msg, res, 200, {});
+    const projectDelted = await ProjectDeleteByIdService(id);
+    if (!projectDelted.status) return response(projectDelted.msg, res, 200, {});
+    return response(projectDelted.msg, res, 200, projectExist.content);
+  } catch (err) {
+    return next(newError(`Couldn't delete project`, 500));
+  }
 }

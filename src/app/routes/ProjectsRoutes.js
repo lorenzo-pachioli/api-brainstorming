@@ -1,4 +1,5 @@
 const express = require("express");
+const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
 const {
     AllProjectController,
     NewProjectController,
@@ -6,51 +7,17 @@ const {
     ProjectControllerByIdAllEpics,
     ProjectDeleteByIdController
 } = require('../controllers/ProjectController');
+const { isNewProjectValid } = require("../helpers/newItemsValidator");
 const router = express.Router();
-const { setNext } = require('../../utils/response');
 
-router.post("", (req, res, next) => {
+router.post("", isTokenValid, isNewProjectValid, NewProjectController);
 
-    const newProject = req.body;
-    const token = req.header('token');
-    setNext(next);
+router.get("", isTokenValid, AllProjectController);
 
-    NewProjectController(token, newProject, res);
-});
+router.get("/:id", isIdAndTokenValid, ProjectControllerById);
 
-router.get("", (req, res, next) => {
+router.get("/:id/epics", isIdAndTokenValid, ProjectControllerByIdAllEpics);
 
-    const token = req.header('token');
-    setNext(next);
-
-    AllProjectController(token, res);
-});
-
-router.get("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    ProjectControllerById(token, id, res);
-});
-
-router.get("/:id/epics", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    ProjectControllerByIdAllEpics(token, id, res);
-});
-
-router.delete("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    ProjectDeleteByIdController(token, id, res);
-});
+router.delete("/:id", isIdAndTokenValid, ProjectDeleteByIdController);
 
 module.exports = router;

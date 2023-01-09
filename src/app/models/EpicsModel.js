@@ -1,6 +1,5 @@
 const { Schema, model } = require('mongoose');
 const Projects = require('./ProjectsModel');
-const UsersBrainstorming = require('./UsersModel');
 
 const epicsSchema = new Schema({
   id: {

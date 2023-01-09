@@ -1,7 +1,7 @@
 const Epics = require('../models/EpicsModel');
 const Stories = require('../models/StoriesModel');
 const Projects = require('../models/ProjectsModel');
-const { response, serviceReturn } = require('../../utils/response');
+const { serviceReturn } = require('../../utils/response');
 
 exports.AllEpicsService = async (userId) => {
 
@@ -19,7 +19,7 @@ exports.NewEpicsService = async (newEpic) => {
   newEpic.id = newMaxId;
   const saved = await Epics.create(newEpic);
 
-  if (saved) return serviceReturn(`Epic list`, saved, true);
+  if (saved) return serviceReturn(`Epic created succesfully`, saved, true);
   return serviceReturn(`The epic ${newEpic.id} failed to save`, {}, false);
 }
 
