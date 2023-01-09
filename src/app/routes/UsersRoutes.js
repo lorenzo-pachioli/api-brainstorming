@@ -1,4 +1,5 @@
 const express = require("express");
+const router = express.Router();
 const {
     AllUsersController,
     NewUsersController,
@@ -6,47 +7,17 @@ const {
     ModifyUserController,
     UserDeleteByIdController
 } = require('../controllers/UsersController');
-const router = express.Router();
-const { setNext } = require('../../utils/response');
+const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
+const { isNewUserValid } = require("../helpers/newItemsValidator");
 
-router.post("", (req, res, next) => {
-    const newUser = req.body;
-    setNext(next);
+router.post("", isNewUserValid, NewUsersController);
 
-    NewUsersController(newUser, res);
-});
+router.get("", isTokenValid, AllUsersController);
 
-router.get("", (req, res, next) => {
-    const token = req.header('token');
-    setNext(next);
+router.get("/:id", isIdAndTokenValid, UsersControllerById);
 
-    AllUsersController(token, res);
-});
+router.put("", isTokenValid, ModifyUserController);
 
-router.get("/:id", (req, res, next) => {
-    const _id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    UsersControllerById(token, _id, res);
-});
-
-router.put("", (req, res, next) => {
-
-    const newUser = req.body;
-    const token = req.header('token');
-    setNext(next);
-
-    ModifyUserController(token, newUser, res);
-});
-
-router.delete("/:id", (req, res, next) => {
-
-    const _id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    UserDeleteByIdController(token, _id, res);
-});
+router.delete("/:id", isIdAndTokenValid, UserDeleteByIdController);
 
 module.exports = router;

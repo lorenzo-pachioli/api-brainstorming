@@ -1,4 +1,3 @@
-const { isIdAndTokenValid, isTokenValid } = require('../../utils/isIdAndTokenValid');
 const {
   NewUsersService,
   AllUsersService,
@@ -6,44 +5,60 @@ const {
   ModifyUsersService,
   UserDeleteByIdService
 } = require('../services/UsersService');
-const { isNewUserValid } = require('../helpers/newItemsValidator');
-const { next } = require('../../utils/response');
 const { newError } = require('../../utils/errorModeling');
-const { isObjectIdValid } = require('../../utils/inputsValidator');
+const { response } = require('../../utils/response');
 
-exports.NewUsersController = (newUser, res) => {
-
-  if (isNewUserValid(newUser, res)) {
-    NewUsersService(newUser, res).catch(() => next(newError(`Couldn't create new user`, 500)));
+exports.NewUsersController = async (req, res, next) => {
+  try {
+    const newUser = req.body;
+    const userSaved = await NewUsersService(newUser);
+    return response(userSaved.msg, res, 200, userSaved.content);
+  } catch (err) {
+    return next(newError(`Couldn't create new user`, 500))
   }
 }
 
-exports.AllUsersController = (token, res) => {
-
-  isTokenValid(token, res) && AllUsersService(res).catch(() => next(newError(`Couldn't get users list`, 500)));
-}
-
-exports.UsersControllerById = (token, _id, res) => {
-
-  if (isTokenValid(token, res) && isObjectIdValid(_id)) {
-    UsersServiceById(_id, res).catch(() => next(newError(`Couldn't get user ${_id}`, 500)));
-  } else {
-    next(newError(`_id: ${_id} is not valid`, 500));
+exports.AllUsersController = async (req, res, next) => {
+  try {
+    const userList = await AllUsersService();
+    return response(userList.msg, res, 200, userList.content);
+  } catch (err) {
+    return next(newError(`Couldn't get users list`, 500))
   }
 }
 
-exports.ModifyUserController = (token, newUser, res) => {
-
-  if (isIdAndTokenValid(newUser.id, token, res) && isNewUserValid(newUser, res)) {
-    ModifyUsersService(newUser, res).catch(() => next(newError(`Couldn't update user`, 500)));
+exports.UsersControllerById = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const userById = await UsersServiceById(userId);
+    return response(userById.msg, res, 200, userById.content);
+  } catch (err) {
+    return next(newError(`Couldn't get user`, 500))
   }
 }
 
-exports.UserDeleteByIdController = (token, _id, res) => {
+exports.ModifyUserController = async (req, res, next) => {
+  try {
+    const newUser = req.body;
+    const userExist = await UsersControllerById(newUser.id);
+    if (!userExist.status) return response(userExist.msg, res, 200, {});
+    if (userExist.content.password !== newUser.password) return serviceReturn(`Incorrect user password`, {});
+    const userModifyed = await ModifyUsersService(newUser);
+    return response(userModifyed.msg, res, 200, userModifyed.content);
+  } catch (err) {
+    return next(newError(`Couldn't update user`, 500))
+  }
+}
 
-  if (isTokenValid(token, res) && isObjectIdValid(_id)) {
-    UserDeleteByIdService(_id, res).catch(() => next(newError(`Couldn't delete user ${_id}`, 500)));
-  } else {
-    next(newError(`_id: ${_id} is not valid`, 500));
+exports.UserDeleteByIdController = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const userExist = await UsersControllerById(userId);
+    if (!userExist.status) return response(userExist.msg, res, 200, {});
+    const userDelted = await UserDeleteByIdService(userId);
+    if (!userDelted.status) return response(userDelted.msg, res, 200, {});
+    return response(userDelted.msg, res, 200, userExist.content);
+  } catch (err) {
+    return next(newError(`Couldn't delete user`, 500))
   }
 }
