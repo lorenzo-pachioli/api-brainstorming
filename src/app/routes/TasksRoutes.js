@@ -7,50 +7,17 @@ const {
     ModifyTasksByIdController
 } = require('../controllers/TasksController');
 const router = express.Router();
-const { setNext } = require('../../utils/response');
+const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
+const { isNewTaskValid } = require("../helpers/newItemsValidator");
 
-router.get("", (req, res, next) => {
+router.get("", isTokenValid, AllTasksController);
 
-    const token = req.header('token');
-    setNext(next);
+router.post("", isTokenValid, isNewTaskValid, NewTasksController);
 
-    AllTasksController(token, res);
-});
+router.get("/:id", isIdAndTokenValid, TasksControllerById);
 
-router.post("", (req, res, next) => {
+router.delete("/:id", isIdAndTokenValid, TasksDeleteByIdController);
 
-    const newTask = req.body;
-    const token = req.header('token');
-    setNext(next);
-
-    NewTasksController(token, newTask, res);
-});
-
-router.get("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    TasksControllerById(token, id, res);
-});
-
-router.delete("/:id", (req, res, next) => {
-
-    const id = req.params.id;
-    const token = req.header('token');
-    setNext(next);
-
-    TasksDeleteByIdController(token, id, res);
-});
-
-router.put("", (req, res, next) => {
-
-    const newTask = req.body;
-    const token = req.header('token');
-    setNext(next);
-
-    ModifyTasksByIdController(token, newTask, res);
-});
+router.put("", isIdAndTokenValid, isNewTaskValid, ModifyTasksByIdController);
 
 module.exports = router;

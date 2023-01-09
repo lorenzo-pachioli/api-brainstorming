@@ -11,7 +11,7 @@ exports.NewStoriesService = async (newStory) => {
   const story = createStories(newMaxId, newStory);
   const saved = await story.save();
   if (saved) return serviceReturn(`Story created succesfully`, saved, true);
-  return serviceReturn(`The Story ${newStory.id} failed to save`, {}, false);
+  return serviceReturn(`The story ${newStory.id} failed to save`, {}, false);
 }
 
 exports.AllStoriesService = async (userId) => {
