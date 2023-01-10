@@ -6,7 +6,7 @@ const {
   EpicDeleteByIdService
 } = require('../services/EpicsService');
 const { newError } = require('../../utils/errorModeling');
-const { ProjectServiceById } = require('../services/ProjectsService');
+const { ProjectServiceById, ProjectServiceByObjectId } = require('../services/ProjectsService');
 const { response } = require('../../utils/response');
 
 exports.AllEpicsController = async (req, res, next) => {
@@ -22,7 +22,7 @@ exports.AllEpicsController = async (req, res, next) => {
 exports.NewEpicsController = async (req, res, next) => {
   try {
     const newEpic = req.body;
-    const projectExist = await ProjectServiceById(newEpic.project);
+    const projectExist = await ProjectServiceByObjectId(newEpic.project);
     if (!projectExist.status) return response(projectExist.msg, res, 200, {});
 
     const epicSaved = await NewEpicsService(newEpic);

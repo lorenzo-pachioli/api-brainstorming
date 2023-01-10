@@ -47,7 +47,6 @@ exports.TasksDeleteByIdController = async (req, res, next) => {
     if (!taskDelted.status) return response(taskDelted.msg, res, 200, {});
     return response(taskDelted.msg, res, 200, taskExist.content);
   } catch (err) {
-    console.log(err);
     return next(newError(`Couldn't delete task`, 500));
   }
 }
@@ -60,7 +59,6 @@ exports.ModifyTasksByIdController = async (req, res, next) => {
     const taskModifyed = await ModifyTasksByIdService(newTask);
     return response(taskModifyed.msg, res, 200, taskModifyed.content);
   } catch (err) {
-    console.log(err);
     return next(newError(`Couldn't update task`, 500));
   }
 }

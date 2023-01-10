@@ -26,6 +26,13 @@ exports.ProjectServiceById = async (id) => {
   return serviceReturn(`Project ${id} doesn't exist`, {}, false);
 }
 
+exports.ProjectServiceByObjectId = async (_id) => {
+
+  const projectById = await Projects.findOne({ _id });
+  if (projectById) return serviceReturn(`Project`, projectById, true);
+  return serviceReturn(`Project ${_id} doesn't exist`, {}, false);
+}
+
 exports.ProjectServiceByIdAllEpics = async (id) => {
 
   const epicsList = await Epics.find({ project: id });
