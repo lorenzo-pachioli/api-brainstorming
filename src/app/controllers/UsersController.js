@@ -40,7 +40,7 @@ exports.UsersControllerById = async (req, res, next) => {
 exports.ModifyUserController = async (req, res, next) => {
   try {
     const newUser = req.body;
-    const userExist = await UsersControllerById(newUser.id);
+    const userExist = await UsersServiceById(newUser.id);
     if (!userExist.status) return response(userExist.msg, res, 200, {});
     if (userExist.content.password !== newUser.password) return serviceReturn(`Incorrect user password`, {});
     const userModifyed = await ModifyUsersService(newUser);
@@ -53,7 +53,7 @@ exports.ModifyUserController = async (req, res, next) => {
 exports.UserDeleteByIdController = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const userExist = await UsersControllerById(userId);
+    const userExist = await UsersServiceById(userId);
     if (!userExist.status) return response(userExist.msg, res, 200, {});
     const userDelted = await UserDeleteByIdService(userId);
     if (!userDelted.status) return response(userDelted.msg, res, 200, {});

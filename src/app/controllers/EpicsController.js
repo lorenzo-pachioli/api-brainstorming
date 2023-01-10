@@ -58,6 +58,9 @@ exports.EpicsControllerByIdAllStories = async (req, res, next) => {
 exports.EpicDeleteByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const epicExist = await EpicsServiceById(id);
+    if (!epicExist.status) return response(epicExist.msg, res, 200, {});
+
     const epicDelete = await EpicDeleteByIdService(id);
     return response(epicDelete.msg, res, 200, epicDelete.content);
   } catch (err) {

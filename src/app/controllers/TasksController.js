@@ -41,24 +41,26 @@ exports.TasksControllerById = async (req, res, next) => {
 exports.TasksDeleteByIdController = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const taskExist = await TasksControllerById(id);
+    const taskExist = await TaskByIdService(id);
     if (!taskExist.status) return response(taskExist.msg, res, 200, {});
     const taskDelted = await TasksDeleteByIdService(id);
     if (!taskDelted.status) return response(taskDelted.msg, res, 200, {});
     return response(taskDelted.msg, res, 200, taskExist.content);
   } catch (err) {
-    return next(newError(`Couldn't get task`, 500));
+    console.log(err);
+    return next(newError(`Couldn't delete task`, 500));
   }
 }
 
 exports.ModifyTasksByIdController = async (req, res, next) => {
   try {
     const newTask = req.body;
-    const taskExist = await TasksControllerById(newTask.id);
+    const taskExist = await TaskByIdService(newTask.id);
     if (!taskExist.status) return response(taskExist.msg, res, 200, {});
     const taskModifyed = await ModifyTasksByIdService(newTask);
     return response(taskModifyed.msg, res, 200, taskModifyed.content);
   } catch (err) {
+    console.log(err);
     return next(newError(`Couldn't update task`, 500));
   }
 }
