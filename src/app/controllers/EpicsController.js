@@ -34,8 +34,8 @@ exports.NewEpicsController = async (req, res, next) => {
 
 exports.EpicsControllerById = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const epic = await EpicsServiceById(userId);
+    const { id } = req.params;
+    const epic = await EpicsServiceById(id);
     return response(epic.msg, res, 200, epic.content);
   } catch (err) {
     next(newError(`Couldn't get epic`, 500))
@@ -44,8 +44,8 @@ exports.EpicsControllerById = async (req, res, next) => {
 
 exports.EpicsControllerByIdAllStories = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const epicExist = await EpicsServiceById(userId);
+    const { id } = req.params;
+    const epicExist = await EpicsServiceById(id);
     if (!epicExist.status) return response(epicExist.msg, res, 200, {});
 
     const storiesList = await EpicsServiceByIdAllStories(id);
@@ -57,8 +57,8 @@ exports.EpicsControllerByIdAllStories = async (req, res, next) => {
 
 exports.EpicDeleteByIdController = async (req, res, next) => {
   try {
-    const { userId } = req.params;
-    const epicDelete = await EpicDeleteByIdService(userId);
+    const { id } = req.params;
+    const epicDelete = await EpicDeleteByIdService(id);
     return response(epicDelete.msg, res, 200, epicDelete.content);
   } catch (err) {
     next(newError(`Couldn't get task`, 500))

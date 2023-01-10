@@ -18,6 +18,6 @@ router.get("/:id", isIdAndTokenValid, TasksControllerById);
 
 router.delete("/:id", isIdAndTokenValid, TasksDeleteByIdController);
 
-router.put("", isIdAndTokenValid, isNewTaskValid, ModifyTasksByIdController);
+router.put("", isTokenValid, isNewTaskValid, ModifyTasksByIdController);
 
 module.exports = router;

@@ -3,7 +3,8 @@ const {
   isDescriptionValid,
   isObjectIdValid,
   isArrayOfObjIdValid,
-  isDateValid
+  isDateValid,
+  isIdInteger
 } = require('../../utils/inputsValidator');
 const { response } = require('../../utils/response');
 
@@ -126,6 +127,8 @@ exports.isNewStoryValid = (req, res, next) => {
 
 exports.isNewTaskValid = (req, res, next) => {
   const {
+    _id,
+    id,
     name,
     description,
     story,
@@ -133,6 +136,12 @@ exports.isNewTaskValid = (req, res, next) => {
     dueDate,
     done
   } = req.body;
+
+  //Validate _id
+  if (!isObjectIdValid(_id)) return response('task _id invalid', res, 400);
+
+  //Validate id
+  if (!isIdInteger(id)) return response('task id invalid', res, 400);
 
   //Validate required info
   if (!name || !story) return response('Incorrect new task', res, 400);
