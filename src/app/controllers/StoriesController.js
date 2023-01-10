@@ -6,6 +6,7 @@ const {
   StoryDeleteByIdService
 } = require('../services/StoriesService');
 const { newError } = require('../../utils/errorModeling');
+const { response } = require('../../utils/response');
 
 exports.NewStoriesController = async (req, res, next) => {
   try {
@@ -23,6 +24,7 @@ exports.AllStoriesController = async (req, res, next) => {
     const storiesList = await AllStoriesService(userId);
     return response(storiesList.msg, res, 200, storiesList.content);
   } catch (err) {
+    console.log(err);
     return next(newError(`Couldn't get stories list`, 500));
   }
 }
