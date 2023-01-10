@@ -8,7 +8,7 @@ const {
 } = require('../controllers/TasksController');
 const router = express.Router();
 const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
-const { isNewTaskValid } = require("../helpers/newItemsValidator");
+const { isNewTaskValid, objectIdValidation, idValidation } = require("../helpers/newItemsValidator");
 
 router.get("", isTokenValid, AllTasksController);
 
@@ -18,6 +18,6 @@ router.get("/:id", isIdAndTokenValid, TasksControllerById);
 
 router.delete("/:id", isIdAndTokenValid, TasksDeleteByIdController);
 
-router.put("", isTokenValid, isNewTaskValid, ModifyTasksByIdController);
+router.put("", isTokenValid, idValidation, objectIdValidation, isNewTaskValid, ModifyTasksByIdController);
 
 module.exports = router;

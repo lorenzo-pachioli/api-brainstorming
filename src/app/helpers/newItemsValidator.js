@@ -125,10 +125,24 @@ exports.isNewStoryValid = (req, res, next) => {
   next();
 }
 
+exports.idValidation = (req, res, next) => {
+  const { id } = req.body;
+
+  //Validate id
+  if (!isIdInteger(id)) return response('id invalid', res, 400);
+  next();
+}
+
+exports.objectIdValidation = (req, res, next) => {
+  const { _id } = req.body;
+
+  //Validate _id
+  if (!isObjectIdValid(_id)) return response('_id invalid', res, 400);
+  next();
+}
+
 exports.isNewTaskValid = (req, res, next) => {
   const {
-    _id,
-    id,
     name,
     description,
     story,
@@ -136,12 +150,6 @@ exports.isNewTaskValid = (req, res, next) => {
     dueDate,
     done
   } = req.body;
-
-  //Validate _id
-  if (!isObjectIdValid(_id)) return response('task _id invalid', res, 400);
-
-  //Validate id
-  if (!isIdInteger(id)) return response('task id invalid', res, 400);
 
   //Validate required info
   if (!name || !story) return response('Incorrect new task', res, 400);

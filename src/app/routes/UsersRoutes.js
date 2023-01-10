@@ -8,7 +8,7 @@ const {
     UserDeleteByIdController
 } = require('../controllers/UsersController');
 const { isTokenValid, isIdAndTokenValid } = require("../../utils/isIdAndTokenValid");
-const { isNewUserValid } = require("../helpers/newItemsValidator");
+const { isNewUserValid, idValidation, objectIdValidation } = require("../helpers/newItemsValidator");
 
 router.post("", isNewUserValid, NewUsersController);
 
@@ -16,7 +16,7 @@ router.get("", isTokenValid, AllUsersController);
 
 router.get("/:id", isIdAndTokenValid, UsersControllerById);
 
-router.put("", isTokenValid, ModifyUserController);
+router.put("", isTokenValid, idValidation, objectIdValidation, ModifyUserController);
 
 router.delete("/:id", isIdAndTokenValid, UserDeleteByIdController);
 
